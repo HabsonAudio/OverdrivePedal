@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <math.h>
 
 //==============================================================================
 OverdrivePedalAudioProcessor::OverdrivePedalAudioProcessor()
@@ -133,6 +134,7 @@ void OverdrivePedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto numSamples = buffer.getNumSamples();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     // In case we have more outputs than inputs, this code clears any output
@@ -153,7 +155,12 @@ void OverdrivePedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer (channel);
-
+        auto* channelReadData = buffer.getReadPointer(channel);
+        
+        for(int sample = 0; sample < numSamples; sample++){
+            channelData[sample] = sigmoid(channelReadData[sample], 20.f);
+            //channelData[sample] = hyperbolicTangent(channelReadData[sample], 20.f);
+        }
         // ..do something to the data...
     }
 }
@@ -181,6 +188,13 @@ void OverdrivePedalAudioProcessor::setStateInformation (const void* data, int si
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+float OverdrivePedalAudioProcessor::sigmoid(float x, float k){
+    return (2.f/(1.f + exp(-k * x))-1.f);
+}
+float OverdrivePedalAudioProcessor::hyperbolicTangent(float x, float k){
+    return (tanh(k*x)/tanh(k));
 }
 
 //==============================================================================
