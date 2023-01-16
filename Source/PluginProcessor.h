@@ -13,6 +13,11 @@
 //==============================================================================
 /**
 */
+struct ParameterSettings{
+    float drive = 0.f;
+    float volume = 0.f;
+};
+
 class OverdrivePedalAudioProcessor  : public juce::AudioProcessor
                             #if JucePlugin_Enable_ARA
                              , public juce::AudioProcessorARAExtension
@@ -57,8 +62,20 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    //Custom Parameter Implementation
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    
+    juce::AudioProcessorValueTreeState apvts{
+        *this,
+        nullptr,
+        "Parameters",
+        createParameterLayout()
+    };
+    
+    ParameterSettings getParameterSettings(juce::AudioProcessorValueTreeState &apvts);
+    
     //Custom DSP functions (Overdrive)
-    float sigmoid(float x, float k);
+    float sigmoid(float x, float drive, float volume);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OverdrivePedalAudioProcessor)
 };

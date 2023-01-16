@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include <math.h>
+#include <memory.h>
 
 //==============================================================================
 OverdrivePedalAudioProcessor::OverdrivePedalAudioProcessor()
@@ -157,8 +158,11 @@ void OverdrivePedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
         auto* channelData = buffer.getWritePointer (channel);
         auto* channelReadData = buffer.getReadPointer(channel);
         
+        //Read current parameters
+        ParameterSettings parameterSettings = getParameterSettings(apvts);
+        
         for(int sample = 0; sample < numSamples; sample++){
-            channelData[sample] = sigmoid(channelReadData[sample], 10.f);
+            channelData[sample] = sigmoid(channelReadData[sample], parameterSettings.drive, parameterSettings.volume);
         }
         // ..do something to the data...
     }
@@ -172,7 +176,8 @@ bool OverdrivePedalAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* OverdrivePedalAudioProcessor::createEditor()
 {
-    return new OverdrivePedalAudioProcessorEditor (*this);
+    //return new OverdrivePedalAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -189,9 +194,44 @@ void OverdrivePedalAudioProcessor::setStateInformation (const void* data, int si
     // whose contents will have been created by the getStateInformation() call.
 }
 
-float OverdrivePedalAudioProcessor::sigmoid(float x, float k){
-    return (2.f/(1.f + exp(-k * x))-1.f);
+// Custom DSP functions (Overdrive)
+float OverdrivePedalAudioProcessor::sigmoid(float x, float drive, float volume){
+    return ((2.f/(1.f + exp(-drive * x))-1.f))*volume;
 }
+//Custom Parameter Implementation
+juce::AudioProcessorValueTreeState::ParameterLayout OverdrivePedalAudioProcessor::createParameterLayout(){
+    
+    //initialise parameter layout
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    
+    
+    //add parameters to layout
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID("Drive",1),
+                                                           "Drive",
+                                                           juce::NormalisableRange<float>(0.01f, 30.f, 0.5f),
+                                                           10.f
+                                                           ));
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID("Volume",1),
+                                                           "Volume",
+                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
+                                                           0.5f
+                                                           ));
+
+    return layout;
+};
+
+//Read the parameters from apvts and return data
+ParameterSettings OverdrivePedalAudioProcessor::getParameterSettings(juce::AudioProcessorValueTreeState &apvts){
+    ParameterSettings parameterSettings;
+    
+    //read settings
+    parameterSettings.drive = apvts.getRawParameterValue("Drive")->load();
+    parameterSettings.volume = apvts.getRawParameterValue("Volume")->load();
+    
+    return parameterSettings;
+};
 
 //==============================================================================
 // This creates new instances of the plugin..
