@@ -209,8 +209,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout OverdrivePedalAudioProcessor
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID("Drive",1),
                                                            "Drive",
-                                                           juce::NormalisableRange<float>(0.01f, 30.f, 0.5f),
-                                                           10.f
+                                                           juce::NormalisableRange<float>(1.0f, 100.f, 0.1f),
+                                                           15.f
                                                            ));
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID("Volume",1),
@@ -227,7 +227,7 @@ ParameterSettings OverdrivePedalAudioProcessor::getParameterSettings(juce::Audio
     ParameterSettings parameterSettings;
     
     //read settings
-    parameterSettings.drive = apvts.getRawParameterValue("Drive")->load();
+    parameterSettings.drive = (0.5 * apvts.getRawParameterValue("Drive")->load())+ 7;
     parameterSettings.volume = apvts.getRawParameterValue("Volume")->load();
     
     return parameterSettings;
