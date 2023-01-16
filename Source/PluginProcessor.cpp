@@ -158,7 +158,7 @@ void OverdrivePedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
         auto* channelReadData = buffer.getReadPointer(channel);
         
         for(int sample = 0; sample < numSamples; sample++){
-            channelData[sample] = sigmoid(channelReadData[sample], 20.f);
+            channelData[sample] = sigmoid(channelReadData[sample], 10.f);
         }
         // ..do something to the data...
     }
