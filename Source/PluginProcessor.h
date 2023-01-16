@@ -59,7 +59,6 @@ public:
 private:
     //Custom DSP functions (Overdrive)
     float sigmoid(float x, float k);
-    float hyperbolicTangent(float x, float k);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OverdrivePedalAudioProcessor)
 };
