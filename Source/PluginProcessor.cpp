@@ -158,7 +158,8 @@ void OverdrivePedalAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
         auto* channelReadData = buffer.getReadPointer(channel);
         
         for(int sample = 0; sample < numSamples; sample++){
-            channelData[sample] = hyperbolicTangent(channelReadData[sample], 10.f);
+            channelData[sample] = sigmoid(channelReadData[sample], 20.f);
+            //channelData[sample] = hyperbolicTangent(channelReadData[sample], 20.f);
         }
         // ..do something to the data...
     }
@@ -189,6 +190,9 @@ void OverdrivePedalAudioProcessor::setStateInformation (const void* data, int si
     // whose contents will have been created by the getStateInformation() call.
 }
 
+float OverdrivePedalAudioProcessor::sigmoid(float x, float k){
+    return (2.f/(1.f + exp(-k * x))-1.f);
+}
 float OverdrivePedalAudioProcessor::hyperbolicTangent(float x, float k){
     return (tanh(k*x)/tanh(k));
 }
