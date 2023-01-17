@@ -198,6 +198,9 @@ void OverdrivePedalAudioProcessor::setStateInformation (const void* data, int si
 float OverdrivePedalAudioProcessor::sigmoid(float x, float drive, float volume){
     return ((2.f/(1.f + exp(-drive * x))-1.f))*volume;
 }
+float OverdrivePedalAudioProcessor::scaleVolume(float x){
+    return (-8.f/75.f)*std::pow(x,3.f) + (2.f/3.f)*std::pow(x, 2.f)+(2.f/25.f)*x+1/100;
+};
 //Custom Parameter Implementation
 juce::AudioProcessorValueTreeState::ParameterLayout OverdrivePedalAudioProcessor::createParameterLayout(){
     
@@ -215,8 +218,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout OverdrivePedalAudioProcessor
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID("Volume",1),
                                                            "Volume",
-                                                           juce::NormalisableRange<float>(0.f, 1.f, 0.01f),
-                                                           0.5f
+                                                           juce::NormalisableRange<float>(0.01f, 1.f, 0.001f),
+                                                           0.4f
                                                            ));
 
     return layout;
@@ -228,7 +231,7 @@ ParameterSettings OverdrivePedalAudioProcessor::getParameterSettings(juce::Audio
     
     //read settings
     parameterSettings.drive = (0.5 * apvts.getRawParameterValue("Drive")->load())+ 7;
-    parameterSettings.volume = apvts.getRawParameterValue("Volume")->load();
+    parameterSettings.volume = scaleVolume(apvts.getRawParameterValue("Volume")->load());
     
     return parameterSettings;
 };

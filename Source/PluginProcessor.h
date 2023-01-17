@@ -74,6 +74,8 @@ private:
     
     ParameterSettings getParameterSettings(juce::AudioProcessorValueTreeState &apvts);
     
+    float scaleVolume(float x);
+    
     //Custom DSP functions (Overdrive)
     float sigmoid(float x, float drive, float volume);
     //==============================================================================
